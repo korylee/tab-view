@@ -1,11 +1,17 @@
 <template>
   <div class="browser">
     <div class="top-bar">
-      <div class="tabs">
+      <TransitionGroup
+        v-draggable="[tabs, dragOptions]"
+        name="tab-sort"
+        tag="div"
+        class="tabs"
+      >
         <div
           v-for="tab in tabs"
           :key="tab.id"
           :class="['tab', { active: tab.id === activeId }]"
+          draggable="true"
           @click="switchTab(tab.id)"
         >
           <span v-if="tab.isLoading" class="spinner"></span>
@@ -19,7 +25,7 @@
             ×
           </button>
         </div>
-      </div>
+      </TransitionGroup>
 
       <button
         class="download-btn"
@@ -42,6 +48,29 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import DownloadIcon from '../icons/download.svg?component'
+import { vDraggable, type DraggableEvent } from 'vue-draggable-plus'
+
+const dragOptions = {
+  animation: 200,
+  ghostClass: 'ghost',
+  chosenClass: 'chosen',
+  dragClass: 'dragging',
+  onEnd: (evt: DraggableEvent) => {
+    const { oldIndex, newIndex } = evt
+
+    // 如果位置没有变化，直接返回
+    if (oldIndex === newIndex) return
+
+    // 1. 手动修改 tabs.value 数组顺序
+    // 这一步至关重要，否则 TransitionGroup 无法感知顺序变化，也就没有动画
+    const movedItem = tabs.value.splice(oldIndex, 1)[0]
+    tabs.value.splice(newIndex, 0, movedItem)
+
+    // 2. 通知 Electron 主进程更新 BrowserView 的实际顺序
+    const newOrder = tabs.value.map((t) => t.id)
+    window.api.tab.reorder(newOrder)
+  }
+}
 
 interface Tab {
   id: string
@@ -279,5 +308,27 @@ onUnmounted(() => {
   justify-content: center;
   color: #9aa0a6;
   font-size: 14px;
+}
+
+/* 确保移动动画流畅 */
+.tab-sort-move {
+  transition: transform 0.3s ease;
+}
+
+/* 被拖拽的元素样式 */
+.tab.dragging {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+
+/* 占位符样式（可选，用于自定义拖拽时的虚影） */
+.ghost {
+  opacity: 0.4;
+  background: #c8ebfb;
+}
+
+/* 被选中的元素样式 */
+.chosen {
+  border: 1px dashed #1a73e8;
 }
 </style>

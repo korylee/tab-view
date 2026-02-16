@@ -85,6 +85,7 @@ export class TabsManager {
     ipcMain.handle('tab:back', (_, id) => this.goBack(id))
     ipcMain.handle('tab:forward', (_, id) => this.goForward(id))
     ipcMain.handle('tab:reload', (_, id) => this.reload(id))
+    ipcMain.handle('tab:reorder', (_, ids) => this.reorderTabs(ids))
   }
 
   private setupEvents(id: string, view: BrowserView): void {
@@ -199,6 +200,22 @@ export class TabsManager {
 
     // 强制重绘
     tab.view.webContents.invalidate()
+  }
+
+  private reorderTabs(sortedIds: string[]): void {
+    const newMap = new Map<string, TabInfo>()
+
+    sortedIds.forEach((id) => {
+      this.tabs.has(id) && newMap.set(id, this.tabs.get(id)!)
+    })
+
+    this.tabs.forEach((value, key) => {
+      !newMap.has(key) && newMap.set(key, value)
+    })
+
+    this.tabs = newMap
+
+    this.notify('tab:reordered', sortedIds)
   }
 
   getAll() {

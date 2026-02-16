@@ -10,7 +10,8 @@ const api = {
       ipcRenderer.invoke('tab:navigate', id, url),
     back: (id: string) => ipcRenderer.invoke('tab:back', id),
     forward: (id: string) => ipcRenderer.invoke('tab:forward', id),
-    reload: (id: string) => ipcRenderer.invoke('tab:reload', id)
+    reload: (id: string) => ipcRenderer.invoke('tab:reload', id),
+    reorder: (ids: string[]) => ipcRenderer.invoke('tab:reorder', ids)
   },
   download: {
     getAll: () => ipcRenderer.invoke('download:getAll'),
