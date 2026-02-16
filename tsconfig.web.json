@@ -1,0 +1,10 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": ["renderer/**/*", "vite.config.*"],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "checkJs": false,
+    "paths": {}
+  }
+}

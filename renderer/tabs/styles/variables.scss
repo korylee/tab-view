@@ -1,0 +1,5 @@
+/**全局SCSS变量  样式值以同文件夹下的json主题配置的值为主，命名推荐全拼小驼峰，这里定义的值可随意取*/
+
+$backgroundColor: var(--background-color, #fff);
+$linkColor: var(--link-color, skyblue);
+
