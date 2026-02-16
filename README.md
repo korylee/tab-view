@@ -22,44 +22,13 @@
 | Electron   | 22.x | 支持 Win7 的最高版本 |
 | Vue        | 3.x  | 组合式 API       |
 | TypeScript | 4.x  | 全类型支持         |
-| Pinia      | 2.x  | 状态管理          |
-| Vite       | 4.x  | 构建工具          |
-
-## 项目结构
-
-```
-electron-vue-browser/
-├── electron/ # Electron 主进程
-│ ├── main.ts # 主入口
-│ ├── preload.ts # 主窗口 preload
-│ ├── panel-preload.ts # 下载面板 preload
-│ └── managers/
-│ ├── TabManager.ts # 标签页管理
-│ └── DownloadManager.ts # 下载管理
-├── src/
-│ ├── components/
-│ │ ├── BrowserChrome.vue # 浏览器主界面
-│ │ └── Icon.vue # SVG 图标组件
-│ ├── stores/
-│ │ ├── tabs.ts # 标签页状态
-│ │ └── downloads.ts # 下载状态
-│ ├── DownloadPanel.vue # 下载面板窗口
-│ ├── App.vue
-│ ├── main.ts # 主窗口入口
-│ └── panel-main.ts # 下载面板入口
-├── index.html
-├── download-panel.html
-├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-└── package.json
-```
+| Vite       | 5.x  | 构建工具          |
 
 ## 安装
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourname/tabview.git
+git clone https://github.com/korylee/tab-view.git
 cd tabview
 
 # 安装依赖
@@ -70,9 +39,6 @@ npm run dev
 
 # 构建生产版本
 npm run build
-
-# 打包应用
-npm run electron:build
 ```
 
 ## 配置
@@ -83,8 +49,6 @@ npm run electron:build
 
 ```ts
 const urls = [
-  'https://github.com',
-  'https://vuejs.org',
   'http://localhost:3000'  // 你的本地项目
 ];
 
@@ -124,10 +88,10 @@ dialog.showSaveDialog() 显示保存对话框
 
 
 ## 开发计划
-[ ] 标签页拖拽排序
-[ ] 会话恢复（重启后恢复标签页）
-[ ] 隐私模式（临时 session）
-[ ] 插件系统
-[ ] 多窗口同步
-[ ] 历史记录
-[ ] 书签管理
+- [ ] 标签页拖拽排序
+- [ ] 会话恢复（重启后恢复标签页）
+- [ ] 隐私模式（临时 session）
+- [ ] 插件系统
+- [ ] 多窗口同步
+- [ ] 历史记录
+- [ ] 书签管理

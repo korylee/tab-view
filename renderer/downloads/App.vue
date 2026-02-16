@@ -2,18 +2,7 @@
   <div class="panel" @click="onBackdropClick">
     <div class="header">
       <div class="title">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
+        <DownloadIcon width="16" height="16" />
         <span>下载管理</span>
         <span v-if="activeCount > 0" class="badge">{{ activeCount }}</span>
       </div>
@@ -26,23 +15,16 @@
     </div>
 
     <div class="list">
-      <div v-if="items.length === 0" class="empty">
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
+      <div v-if="downloads.length === 0" class="empty">
+        <DownloadIcon width="48" height="48" />
         <p>暂无下载任务</p>
       </div>
 
-      <div v-for="item in items" :key="item.id" :class="['item', item.state]">
+      <div
+        v-for="item in downloads"
+        :key="item.id"
+        :class="['item', item.state]"
+      >
         <div class="icon" :class="item.state">
           <svg
             v-if="item.state === 'progressing'"
@@ -110,34 +92,10 @@
               @click="open(item.id)"
               title="打开"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
+              <OpenIcon width="14" height="14" />
             </button>
             <button class="btn-icon" @click="show(item.id)" title="文件夹">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                />
-              </svg>
+              <FolderIcon width="14" height="14" />
             </button>
           </template>
           <button
@@ -146,19 +104,7 @@
             @click="remove(item.id)"
             title="删除"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <polyline points="3 6 5 6 21 6" />
-              <path
-                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-              />
-            </svg>
+            <DeleteIcon width="14" height="14" />
           </button>
         </div>
       </div>
@@ -168,6 +114,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import DownloadIcon from '../icons/download.svg?component'
+import OpenIcon from '../icons/open.svg?component'
+import DeleteIcon from '../icons/delete.svg?component'
+import FolderIcon from '../icons/folder.svg?component'
 
 interface DownloadItem {
   id: string
@@ -183,13 +133,13 @@ interface DownloadItem {
   percent: number
 }
 
-const items = ref<DownloadItem[]>([])
+const downloads = ref<DownloadItem[]>([])
 
 const activeCount = computed(
-  () => items.value.filter((d) => d.state === 'progressing').length
+  () => downloads.value.filter((d) => d.state === 'progressing').length
 )
 const completedCount = computed(
-  () => items.value.filter((d) => d.state === 'completed').length
+  () => downloads.value.filter((d) => d.state === 'completed').length
 )
 
 const formatSize = (bytes: number): string => {
@@ -216,30 +166,30 @@ const onBackdropClick = (e: Event) => {
 const cleanups: (() => void)[] = []
 
 onMounted(async () => {
-  items.value = await window.api.download.getAll()
+  downloads.value = await window.api.download.getAll()
 
   const on = (channel: string, handler: (...args: any[]) => void) => {
     const cleanup = window.api.on(channel, handler)
     cleanups.push(cleanup)
   }
 
-  on('download:added', (data) => items.value.unshift(data))
+  on('download:added', (data) => downloads.value.unshift(data))
   on('download:updated', (data) => {
-    const item = items.value.find((d) => d.id === data.id)
+    const item = downloads.value.find((d) => d.id === data.id)
     if (item) Object.assign(item, data)
   })
   on('download:completed', (data) => {
-    const item = items.value.find((d) => d.id === data.id)
+    const item = downloads.value.find((d) => d.id === data.id)
     if (item) {
       item.state = data.state
       item.endTime = Date.now()
     }
   })
   on('download:removed', (id) => {
-    items.value = items.value.filter((d) => d.id !== id)
+    downloads.value = downloads.value.filter((d) => d.id !== id)
   })
   on('download:cleared', (ids: string[]) => {
-    items.value = items.value.filter((d) => !ids.includes(d.id))
+    downloads.value = downloads.value.filter((d) => !ids.includes(d.id))
   })
 })
 

@@ -1,18 +1,23 @@
-<!-- src/components/BrowserChrome.vue -->
 <template>
   <div class="browser">
     <div class="top-bar">
       <div class="tabs">
         <div
-          v-for="tab in tabStore.tabs"
+          v-for="tab in tabs"
           :key="tab.id"
-          :class="['tab', { active: tab.id === tabStore.activeId }]"
+          :class="['tab', { active: tab.id === activeId }]"
           @click="switchTab(tab.id)"
         >
           <span v-if="tab.isLoading" class="spinner"></span>
           <span v-else class="dot"></span>
           <span class="title">{{ tab.title }}</span>
-          <button class="close" @click.stop="closeTab(tab.id)">×</button>
+          <button
+            v-if="tabs.length > 1"
+            class="close"
+            @click.stop="closeTab(tab.id)"
+          >
+            ×
+          </button>
         </div>
       </div>
 
@@ -21,17 +26,7 @@
         :class="{ active: downloadingCount > 0 }"
         @click="toggleDownload"
       >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-        </svg>
+        <DownloadIcon width="14" height="14" />
         <span v-if="downloadingCount > 0" class="count">{{
           downloadingCount
         }}</span>
@@ -39,28 +34,51 @@
     </div>
 
     <div class="content">
-      <div v-if="tabStore.tabs.length === 0" class="empty">
-        没有打开的标签页
-      </div>
+      <div v-if="tabs.length === 0" class="empty">没有打开的标签页</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { useTabsStore } from './stores/tabs'
+import DownloadIcon from '../icons/download.svg?component'
 
-const tabStore = useTabsStore()
+interface Tab {
+  id: string
+  url: string
+  title: string
+  canGoBack: boolean
+  canGoForward: boolean
+  isLoading: boolean
+}
+
+const tabs = ref([])
+const activeId = ref('')
+const setTabs = (list: Tab[]) => {
+  tabs.value = list
+}
+const addTab = (tab: Tab) => tabs.value.push(tab)
+const removeTab = (id: string) => {
+  tabs.value = tabs.value.filter((t) => t.id !== id)
+}
+const updateTab = (id: string, data: Partial<Tab>) => {
+  const tab = tabs.value.find((t) => t.id === id)
+  if (tab) Object.assign(tab, data)
+}
+const setActive = (id: string) => {
+  activeId.value = id
+}
+
 const downloadingCount = ref(0)
 
 const switchTab = (id: string) => {
   window.api.tab.switch(id)
-  tabStore.setActive(id)
+  setActive(id)
 }
 
 const closeTab = (id: string) => {
   window.api.tab.close(id)
-  tabStore.removeTab(id)
+  removeTab(id)
 }
 
 const toggleDownload = () => {
@@ -71,18 +89,18 @@ const cleanups: (() => void)[] = []
 
 onMounted(async () => {
   const tabs = await window.api.tab.getAll()
-  tabs.forEach((tab) => tabStore.addTab(tab))
-  if (tabs.length > 0) tabStore.setActive(tabs[0].id)
+  setTabs(tabs)
+  if (tabs.length > 0) setActive(tabs[0].id)
 
   const on = (channel: string, handler: (...args: any[]) => void) => {
     const cleanup = window.api.on(channel, handler)
     cleanups.push(cleanup)
   }
 
-  on('tab:created', (tab) => tabStore.addTab(tab))
-  on('tab:switched', ({ id }) => tabStore.setActive(id))
-  on('tab:closed', (id) => tabStore.removeTab(id))
-  on('tab:updated', ({ id, ...data }) => tabStore.updateTab(id, data))
+  on('tab:created', (tab) => addTab(tab))
+  on('tab:switched', ({ id }) => setActive(id))
+  on('tab:closed', (id) => removeTab(id))
+  on('tab:updated', ({ id, ...data }) => updateTab(id, data))
   on('download:changed', async () => {
     const downloads = await window.api.download.getAll()
     downloadingCount.value = downloads.filter(

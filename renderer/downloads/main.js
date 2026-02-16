@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 // import { createPinia } from 'pinia'
 // src\main.ts
-import 'virtual:svg-icons-register'
+// import 'virtual:svg-icons-register'
 import './style.css'
 
 // import router from './router'
