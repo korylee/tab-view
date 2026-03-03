@@ -5,12 +5,14 @@ const path = require('node:path')
 /**@type {import('@electron-forge/shared-types').ForgeConfig} */
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: path.join('./config.json')
+    },
     download: {
       cacheMode: 0,
       cacheRoot: path.resolve(__dirname, 'electron-cache'),
       mirrorOptions: {
-        mirror: 'https://mirrors.huaweicloud.com/electron/',
+        mirror: 'https://mirrors.huaweicloud.com/electron/'
       }
     },
     electronZipDir: path.resolve(__dirname, 'electron-cache/')

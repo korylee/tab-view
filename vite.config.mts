@@ -76,12 +76,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         tabs: path.resolve(__dirname, 'tabs.html'),
-        downloads: path.resolve(__dirname, 'downloads.html'),
+        downloads: path.resolve(__dirname, 'downloads.html')
       },
       output: {
         dir: 'dist',
-        entryFileNames: 'renderer/[name]/[name].js',
-        chunkFileNames: 'renderer/[name]/[name].js'
+        // entryFileNames: 'renderer/[name]/[name].js',
+        // chunkFileNames: 'renderer/[name]/[name].js'
         // assetFileNames: `renderer/[name]/[name][extname]`
       }
     },

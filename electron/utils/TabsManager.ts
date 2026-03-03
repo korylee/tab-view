@@ -1,5 +1,21 @@
-import { BrowserView, BrowserWindow, ipcMain, Session } from 'electron'
+import { BrowserView, BrowserWindow, ipcMain, Session, webContents, WebContents } from 'electron'
 import { PRELOAD_PATH } from './constant'
+import path from 'node:path'
+import fs from 'node:fs'
+
+const configPath = path.join(__dirname, '../config.json')
+
+const config = (function () {
+  try {
+    const configData = fs.readFileSync(configPath, 'utf-8')
+    return JSON.parse(configData)
+  } catch (e) {
+    console.error('Error reading config file', e)
+    return {}
+  }
+})()
+
+console.log('config-data', configPath, config)
 
 interface TabInfo {
   id: string
@@ -17,7 +33,7 @@ export class TabsManager {
   private readonly session: Session
   private readonly tabBarHeight = 40
 
-  constructor(private mainWindow: BrowserWindow) {
+  constructor(private readonly mainWindow: BrowserWindow) {
     this.session = mainWindow.webContents.session
 
     this.setupIPC()
@@ -27,7 +43,7 @@ export class TabsManager {
     mainWindow.on('maximize', () => this.resize())
     mainWindow.on('unmaximize', () => this.resize())
 
-    const urls = ['https://cn.bing.com', 'https://baidu.com']
+    const urls: string[] = config?.initialTabs ?? []
     urls.forEach((url, i) => {
       const id = this.createTab(url)
       i === 0 && this.switchTab(id)
@@ -39,8 +55,6 @@ export class TabsManager {
   }
 
   createTab(url: string): string {
-    const id = `tab-${Date.now().toString(32)}`
-
     const view = new BrowserView({
       webPreferences: {
         nodeIntegration: false,
@@ -52,6 +66,8 @@ export class TabsManager {
         partition: 'persist:main'
       }
     })
+    // id 全局唯一
+    const id = `${view.webContents.id}`
 
     const tab: TabInfo = {
       id,
@@ -147,8 +163,9 @@ export class TabsManager {
     this.notify('tab:switched', this.serialize(tab))
   }
 
-  closeTab(id: string): void {
-    const tab = this.tabs.get(id)
+  closeTab(val: string | WebContents): void {
+    const id = typeof val === 'string' ? val : String(val.id)
+    const tab =  this.tabs.get(id)
     if (!tab) return
 
     if (this.activeTabId === id) {

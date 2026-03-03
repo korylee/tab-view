@@ -43,8 +43,9 @@ function createWindow() {
 
   win.setMenu(null)
 
-  new TabsManager(win)
-  new DownloadManager(win)
+  // managers 分层
+  const tabs = new TabsManager(win)
+  new DownloadManager(win, { tabs })
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL + 'tabs')
@@ -52,7 +53,7 @@ function createWindow() {
       mode: 'detach'
     })
   } else {
-    win.loadFile(path.join(process.env.VITE_DIST, 'renderer/tabs/index.html'))
+    win.loadFile(path.join(process.env.VITE_DIST, 'tabs.html'))
   }
   // // 打开配置页面
   // globalShortcut.register('CommandOrControl+Shift+F', () => {

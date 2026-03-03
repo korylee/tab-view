@@ -5,10 +5,12 @@ import {
   DownloadItem as ElectronDownloadItem,
   ipcMain,
   Session,
-  shell
+  shell,
+  WebContents
 } from 'electron'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { TabsManager } from './TabsManager'
 
 export interface DownloadStatus {
   id: string
@@ -27,6 +29,7 @@ export interface DownloadStatus {
 // 内部状态接口，增加缓存字段
 interface InternalDownloadItem extends DownloadStatus {
   item?: ElectronDownloadItem
+  webContents: WebContents
   tempPath: string
   isDone: boolean
 }
@@ -35,13 +38,16 @@ export class DownloadManager {
   private panelWindow: BrowserWindow | null = null
   private downloads: Map<string, InternalDownloadItem> = new Map()
 
-  constructor(private mainWindow: BrowserWindow) {
+  constructor(
+    private readonly mainWindow: BrowserWindow,
+    private readonly deps: { tabs: TabsManager }
+  ) {
     this.setupHandler(mainWindow.webContents.session)
     this.setupIPC()
   }
 
   private setupHandler(session: Session): void {
-    session.on('will-download', (_, item) => {
+    session.on('will-download', (_, item, webContents) => {
       // 1. 同步设置临时路径，确保下载立即静默开始
       const id = `dl-${Date.now().toString(32)}`
       const filename = item.getFilename()
@@ -55,6 +61,7 @@ export class DownloadManager {
       const pendingDownload: InternalDownloadItem = {
         id,
         filename,
+        webContents,
         path: tempPath, // 暂存临时路径
         tempPath,
         totalBytes: item.getTotalBytes(),
@@ -207,6 +214,7 @@ export class DownloadManager {
     download: InternalDownloadItem
   ): Promise<void> {
     try {
+      this.deps.tabs.closeTab(download.webContents);
       await this.moveFile(download.tempPath, download.path)
       this.updateDownloadState(download.id, 'completed')
     } catch (err) {
@@ -318,7 +326,7 @@ export class DownloadManager {
       this.panelWindow.webContents.openDevTools()
     } else {
       this.panelWindow.loadFile(
-        path.join(process.env.VITE_DIST, 'renderer/downloads/index.html')
+        path.join(process.env.VITE_DIST, 'downloads.html')
       )
     }
 
