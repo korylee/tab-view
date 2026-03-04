@@ -8,6 +8,7 @@ module.exports = {
     asar: {
       unpack: path.join('./config.json')
     },
+    ignore: /\/(electron-cache|renderer|\.vue-devtools@6\.5\.1)\/|env/,
     download: {
       cacheMode: 0,
       cacheRoot: path.resolve(__dirname, 'electron-cache'),
@@ -51,7 +52,7 @@ module.exports = {
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-      [FuseV1Options.OnlyLoadAppFromAsar]: true
+      [FuseV1Options.OnlyLoadAppFromAsar]: false
     })
   ],
   electronRebuildConfig: {

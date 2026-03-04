@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "vite --mode development",
     "pro": "vite --mode production",
+    "build": "npm run build:vite && npm run package:winx64",
     "build:vite": "vite build --mode production",
-    "build:package-winx64": "electron-forge package --arch=x64 --platform=win32",
-    "build": "npm run build:vite && npm run build:package-winx64",
+    "package:winx64": "electron-forge package --arch=x64 --platform=win32",
     "preview": "vite preview",
     "format": "prettier --write src/",
     "start": "electron-forge start",
