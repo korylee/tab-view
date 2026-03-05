@@ -56,6 +56,14 @@ export class DownloadManager {
       // 不调用 event.preventDefault()，通过 setSavePath 抑制默认弹窗
       item.setSavePath(tempPath)
 
+
+      // 当前页面如果是用于下载的空白页，自动关闭
+      const curTab = this.deps.tabs.getTab(webContents)
+      if (curTab && item.getURL() === curTab.url) {
+        this.deps.tabs.closeTab(webContents)
+      }
+
+
       // 2. 预先创建状态对象，用于暂存后台下载进度
       // 此时还未添加到 this.downloads，对用户不可见
       const pendingDownload: InternalDownloadItem = {
@@ -214,7 +222,6 @@ export class DownloadManager {
     download: InternalDownloadItem
   ): Promise<void> {
     try {
-      this.deps.tabs.closeTab(download.webContents);
       await this.moveFile(download.tempPath, download.path)
       this.updateDownloadState(download.id, 'completed')
     } catch (err) {

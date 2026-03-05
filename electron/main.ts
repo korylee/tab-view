@@ -1,9 +1,8 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron'
 // import Store from 'electron-store'
 import path from 'node:path'
-import { TabsManager } from './utils/TabsManager'
-import { PRELOAD_PATH } from './utils/constant'
-import { DownloadManager } from './utils/DownloadsManager'
+import { DownloadManager } from './managers/DownloadsManager'
+import { TabsManager } from './managers/TabsManager'
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -34,7 +33,7 @@ function createWindow() {
     height: 800,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
-      preload: PRELOAD_PATH,
+      preload: path.json(__dirname, 'proload.js'),
       sandbox: true,
       nodeIntegration: true,
       contextIsolation: true

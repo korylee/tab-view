@@ -1,21 +1,12 @@
-import { BrowserView, BrowserWindow, ipcMain, Session, webContents, WebContents } from 'electron'
-import { PRELOAD_PATH } from './constant'
+import {
+  BrowserView,
+  BrowserWindow,
+  ipcMain,
+  Session,
+  WebContents
+} from 'electron'
+import config from '../config'
 import path from 'node:path'
-import fs from 'node:fs'
-
-const configPath = path.join(__dirname, '../config.json')
-
-const config = (function () {
-  try {
-    const configData = fs.readFileSync(configPath, 'utf-8')
-    return JSON.parse(configData)
-  } catch (e) {
-    console.error('Error reading config file', e)
-    return {}
-  }
-})()
-
-console.log('config-data', configPath, config)
 
 interface TabInfo {
   id: string
@@ -54,13 +45,18 @@ export class TabsManager {
     return this.tabs.get(this.activeTabId || '')
   }
 
+  getTab(val: string | WebContents) {
+    const id = typeof val === 'string' ? val : String(val.id)
+    return this.tabs.get(id)
+  }
+
   createTab(url: string): string {
     const view = new BrowserView({
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         // sandbox: true,
-        preload: PRELOAD_PATH,
+        preload: path.join(__dirname, 'preload.js'),
         // 同域存储共享
         session: this.session,
         partition: 'persist:main'
@@ -165,7 +161,7 @@ export class TabsManager {
 
   closeTab(val: string | WebContents): void {
     const id = typeof val === 'string' ? val : String(val.id)
-    const tab =  this.tabs.get(id)
+    const tab = this.tabs.get(id)
     if (!tab) return
 
     if (this.activeTabId === id) {

@@ -1,3 +1,6 @@
+const {
+  AutoUnpackNativesPlugin
+} = require('@electron-forge/plugin-auto-unpack-natives')
 const { FusesPlugin } = require('@electron-forge/plugin-fuses')
 const { FuseV1Options, FuseVersion } = require('@electron/fuses')
 const path = require('node:path')
@@ -6,7 +9,7 @@ const path = require('node:path')
 module.exports = {
   packagerConfig: {
     asar: {
-      unpack: path.join('./config.json')
+      unpack: 'config.json'
     },
     ignore: /\/(electron-cache|renderer|\.vue-devtools@6\.5\.1)\/|env/,
     download: {
@@ -39,10 +42,7 @@ module.exports = {
     }
   ],
   plugins: [
-    {
-      name: '@electron-forge/plugin-auto-unpack-natives',
-      config: {}
-    },
+    new AutoUnpackNativesPlugin({}),
     // Fuses are used to enable/disable various Electron functionality
     // at package time, before code signing the application
     new FusesPlugin({
