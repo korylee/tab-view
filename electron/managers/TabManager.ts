@@ -18,7 +18,7 @@ interface TabInfo {
   isLoading: boolean
 }
 
-export class TabsManager {
+export class TabManager {
   private tabs: Map<string, TabInfo> = new Map()
   private activeTabId: string | null = null
   private readonly session: Session
@@ -56,7 +56,7 @@ export class TabsManager {
         nodeIntegration: false,
         contextIsolation: true,
         // sandbox: true,
-        preload: path.join(__dirname, 'preload.js'),
+        preload: path.join(__dirname, './preload.js'),
         // 同域存储共享
         session: this.session,
         partition: 'persist:main'

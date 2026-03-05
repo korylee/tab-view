@@ -157,7 +157,7 @@ onUnmounted(() => {
   height: 40px;
   display: flex;
   align-items: center;
-  background: #f8f9fa;
+  background: rgb(222, 225, 230);
   border-bottom: 1px solid #dadce0;
   padding: 0 8px;
 }

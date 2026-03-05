@@ -10,7 +10,7 @@ import {
 } from 'electron'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { TabsManager } from './TabsManager'
+import { TabManager } from './TabManager'
 
 export interface DownloadStatus {
   id: string
@@ -40,7 +40,7 @@ export class DownloadManager {
 
   constructor(
     private readonly mainWindow: BrowserWindow,
-    private readonly deps: { tabs: TabsManager }
+    private readonly deps: { tab: TabManager }
   ) {
     this.setupHandler(mainWindow.webContents.session)
     this.setupIPC()
@@ -58,9 +58,9 @@ export class DownloadManager {
 
 
       // 当前页面如果是用于下载的空白页，自动关闭
-      const curTab = this.deps.tabs.getTab(webContents)
+      const curTab = this.deps.tab.getTab(webContents)
       if (curTab && item.getURL() === curTab.url) {
-        this.deps.tabs.closeTab(webContents)
+        this.deps.tab.closeTab(webContents)
       }
 
 
@@ -322,18 +322,18 @@ export class DownloadManager {
       frame: false,
       resizable: true,
       webPreferences: {
-        preload: path.join(__dirname, './preload.js'),
+        preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true
       }
     })
 
     const serveUrl = process.env['VITE_DEV_SERVER_URL']
     if (serveUrl) {
-      this.panelWindow.loadURL(serveUrl + 'downloads')
+      this.panelWindow.loadURL(serveUrl + 'download')
       this.panelWindow.webContents.openDevTools()
     } else {
       this.panelWindow.loadFile(
-        path.join(process.env.VITE_DIST, 'downloads.html')
+        path.join(process.env.VITE_DIST, 'download.html')
       )
     }
 

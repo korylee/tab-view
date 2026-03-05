@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import path from 'node:path'
-import electron from 'vite-plugin-electron/simple'
+import electron from 'vite-plugin-electron'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import svgLoader from 'vite-svg-loader'
@@ -14,22 +14,12 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    electron({
-      main: {
-        // Shortcut of `build.lib.entry`.
-        entry: 'electron/main.ts',
-        vite: {}
-      },
-      preload: {
-        // Shortcut of `build.rollupOptions.input`.
-        // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-        input: path.join(__dirname, 'electron/preload.ts')
-      },
-      // Ployfill the Electron and Node.js API for Renderer process.
-      // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
-      // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
-      renderer: {}
-    }),
+    electron([
+      { entry: 'electron/main.ts' },
+      {
+        entry: 'electron/preload.ts'
+      }
+    ]),
     // AutoImport({
     //   resolvers: [
     //     ElementPlusResolver(),
@@ -75,11 +65,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        tabs: path.resolve(__dirname, 'tabs.html'),
-        downloads: path.resolve(__dirname, 'downloads.html')
+        tab: path.resolve(__dirname, 'tab.html'),
+        download: path.resolve(__dirname, 'download.html')
       },
       output: {
-        dir: 'dist',
+        dir: 'dist'
         // entryFileNames: 'renderer/[name]/[name].js',
         // chunkFileNames: 'renderer/[name]/[name].js'
         // assetFileNames: `renderer/[name]/[name][extname]`

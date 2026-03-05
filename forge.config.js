@@ -5,13 +5,21 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses')
 const { FuseV1Options, FuseVersion } = require('@electron/fuses')
 const path = require('node:path')
 
+// 所有仅在渲染进程（前端页面）使用的库移动到 devDependencies 中。
+// 例如：vue, vuetify, axios, pinia, vue-router 等。
+// Vite 在编译时会处理这些依赖，打包后的代码不再需要读取 node_modules 中的源码。
+
+// 主进程或预加载脚本真正依赖的原生模块或运行时库保留在 dependencies 中。
+// 例如：electron-squirrel-startup, sqlite3, electron-store 或其他 Node.js 原生模块。
+
 /**@type {import('@electron-forge/shared-types').ForgeConfig} */
 module.exports = {
   packagerConfig: {
+    ignore:
+      /^\/?(electron-cache|electron|renderer|public|env|\.vue-devtools@6\.5\.1|\.idea|node_modules\/\.ignored)\//,
     asar: {
       unpack: 'config.json'
     },
-    ignore: /\/(electron-cache|renderer|\.vue-devtools@6\.5\.1)\/|env/,
     download: {
       cacheMode: 0,
       cacheRoot: path.resolve(__dirname, 'electron-cache'),

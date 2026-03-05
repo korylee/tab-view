@@ -2,6 +2,9 @@
   "name": "tab-view",
   "private": true,
   "version": "0.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite --mode development",
     "pro": "vite --mode production",
@@ -17,17 +20,17 @@
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
     "@electron-toolkit/utils": "^1.0.2",
-    "axios": "^1.13.5",
     "electron-log": "^5.1.6",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.2.0",
-    "electron-updater": "^6.2.1",
+    "electron-updater": "^6.2.1"
+  },
+  "devDependencies": {
+    "axios": "^1.13.5",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue-draggable-plus": "^0.6.1",
-    "vue-router": "^4.3.0"
-  },
-  "devDependencies": {
+    "vue-router": "^4.3.0",
     "@electron-forge/cli": "^7.11.1",
     "@electron-forge/maker-deb": "^7.11.1",
     "@electron-forge/maker-rpm": "^7.11.1",

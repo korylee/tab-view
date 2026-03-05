@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 // import Store from 'electron-store'
 import path from 'node:path'
-import { DownloadManager } from './managers/DownloadsManager'
-import { TabsManager } from './managers/TabsManager'
+import { DownloadManager } from './managers/DownloadManager'
+import { TabManager } from './managers/TabManager'
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -33,26 +33,27 @@ function createWindow() {
     height: 800,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
-      preload: path.json(__dirname, 'proload.js'),
-      sandbox: true,
-      nodeIntegration: true,
-      contextIsolation: true
+      preload: path.join(__dirname, './preload.js'),
+      // sandbox: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      webviewTag: true
     }
   })
 
   win.setMenu(null)
 
   // managers 分层
-  const tabs = new TabsManager(win)
-  new DownloadManager(win, { tabs })
+  const tab = new TabManager(win)
+  new DownloadManager(win, { tab })
 
   if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL + 'tabs')
+    win.loadURL(VITE_DEV_SERVER_URL + 'tab')
     win.webContents.openDevTools({
       mode: 'detach'
     })
   } else {
-    win.loadFile(path.join(process.env.VITE_DIST, 'tabs.html'))
+    win.loadFile(path.join(process.env.VITE_DIST, 'tab.html'))
   }
   // // 打开配置页面
   // globalShortcut.register('CommandOrControl+Shift+F', () => {
@@ -84,12 +85,4 @@ app.whenReady().then(() => {
       createWindow()
     }
   })
-})
-
-/**
- * ipc通信
- */
-/**打开控制台 */
-ipcMain.on('openDevtools', (event: Electron.IpcMainEvent) => {
-  event.sender.openDevTools()
 })
